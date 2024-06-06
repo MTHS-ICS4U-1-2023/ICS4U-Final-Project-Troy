@@ -15,10 +15,11 @@ WEIGHT_DECAY = 0.001
 LEARNING_RATE = 0.001
 
 
-train_df = pd.read_csv("train.csv")
-test_df = pd.read_csv("test.csv")
-train_images = os.getcwd() + "/train_images/" + train_df.iloc[:, 0].values
-test_images = os.getcwd() + "/test_images/" + test_df.iloc[:, 0].values
+train_df = pd.read_csv("/home/ec2-user/environment/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/train.csv")
+test_df = pd.read_csv("/home/ec2-user/environment/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/test.csv")
+train_images = os.getcwd() + "/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/train_images/" + train_df.iloc[:, 0].values
+test_images = os.getcwd() + "/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/test_images/" + test_df.iloc[:, 0].values
+
 
 train_labels = train_df.iloc[:, 1:].values
 test_labels = test_df.iloc[:, 1:].values
@@ -82,8 +83,14 @@ model = keras.Model(inputs=inputs, outputs=[output1, output2])
 
 model.compile(
     optimizer=keras.optimizers.Adam(LEARNING_RATE),
-    loss=keras.losses.SparseCategoricalCrossentropy(),
-    metrics=["accuracy"],
+    loss={
+        "first_num": keras.losses.SparseCategoricalCrossentropy(),
+        "second_num": keras.losses.SparseCategoricalCrossentropy()
+    },
+    metrics={
+        "first_num": ["accuracy"],
+        "second_num": ["accuracy"]
+    }
 )
 
 model.fit(train_dataset, epochs=5, verbose=2)
