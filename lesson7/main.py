@@ -18,7 +18,7 @@ LEARNING_RATE = 0.001
 train_df = pd.read_csv("/home/ec2-user/environment/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/train.csv")
 test_df = pd.read_csv("/home/ec2-user/environment/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/test.csv")
 train_images = os.getcwd() + "/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/train_images/" + train_df.iloc[:, 0].values
-test_images = os.getcwd() + "/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/test_images/" + test_df.iloc[:, 0].values
+test_images = os.getcwd() + "/ICS4U/Final-Project/ICS4U-Final-Project-Troy/lesson7/test_images/" + test_df.iloc[:, 0].values<<<<<<< HEAD
 
 train_labels = train_df.iloc[:, 1:].values
 test_labels = test_df.iloc[:, 1:].values

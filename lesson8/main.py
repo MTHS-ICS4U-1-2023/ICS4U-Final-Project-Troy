@@ -1,19 +1,31 @@
 import os
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.datasets import mnist
 
+# Suppress TensorFlow logging messages
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+# Ensure TensorFlow version is correct
+print("TensorFlow version:", tf.__version__)
+
+# Load MNIST dataset
+print("Loading MNIST dataset...")
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
+print("MNIST dataset loaded.")
+
+# Reshape and normalize the data
 x_train = x_train.reshape(-1, 28, 28, 1).astype("float32") / 255.0
 x_test = x_test.reshape(-1, 28, 28, 1).astype("float32") / 255.0
 
-# CNN -> BatchNorm -> ReLU (common structure)
-# x10 (a lot of code to write!)
+# Print data shapes
+print("x_train shape:", x_train.shape)
+print("y_train shape:", y_train.shape)
+print("x_test shape:", x_test.shape)
+print("y_test shape:", y_test.shape)
 
-
+# Custom CNN block
 class CNNBlock(layers.Layer):
     def __init__(self, out_channels, kernel_size=3):
         super(CNNBlock, self).__init__()
@@ -26,12 +38,7 @@ class CNNBlock(layers.Layer):
         x = tf.nn.relu(x)
         return x
 
-
-model = keras.Sequential(
-    [CNNBlock(32), CNNBlock(64), CNNBlock(128), layers.Flatten(), layers.Dense(10),]
-)
-
-
+# Custom residual block
 class ResBlock(layers.Layer):
     def __init__(self, channels):
         super(ResBlock, self).__init__()
@@ -45,11 +52,11 @@ class ResBlock(layers.Layer):
     def call(self, input_tensor, training=False):
         x = self.cnn1(input_tensor, training=training)
         x = self.cnn2(x, training=training)
-        x = self.cnn3(x + self.identity_mapping(input_tensor), training=training,)
+        x = self.cnn3(x + self.identity_mapping(input_tensor), training=training)
         x = self.pooling(x)
         return x
 
-
+# Custom ResNet-like model
 class ResNet_Like(keras.Model):
     def __init__(self, num_classes=10):
         super(ResNet_Like, self).__init__()
@@ -63,27 +70,37 @@ class ResNet_Like(keras.Model):
         x = self.block1(input_tensor, training=training)
         x = self.block2(x, training=training)
         x = self.block3(x, training=training)
-        x = self.pool(x, training=training)
+        x = self.pool(x)
         x = self.classifier(x)
         return x
 
-    def model(self):
+    def build_graph(self):
         x = keras.Input(shape=(28, 28, 1))
         return keras.Model(inputs=[x], outputs=self.call(x))
 
-
-model = ResNet_Like().model()
-base_input = model.layers[0].input
-base_output = model.layers[2].output
-output = layers.Dense(10)(layers.Flatten()(base_output))
-model = keras.Model(base_input, output)
-
+# Instantiate and compile model
+print("Building and compiling model...")
+resnet_like = ResNet_Like(num_classes=10)
+model = resnet_like.build_graph()
 model.compile(
     optimizer=keras.optimizers.Adam(),
     loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
     metrics=["accuracy"],
 )
+print("Model compiled.")
 
-model.fit(x_train, y_train, batch_size=64, epochs=1, verbose=2)
+# Print model summary
+model.summary()
+
+# Train and evaluate model
+print("Starting training...")
+history = model.fit(x_train, y_train, batch_size=64, epochs=1, verbose=2)  # Adjust epochs as needed
+print("Training completed.")
+
+print("Evaluating model...")
 model.evaluate(x_test, y_test, batch_size=64, verbose=2)
+print("Evaluation completed.")
+
+# Save model
 model.save("pretrained")
+print("Model saved.")
